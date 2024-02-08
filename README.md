@@ -3,6 +3,8 @@
 # Sapphire Images
 Sapphire Images allows you to upload images and get URLs that permanently point to these images right within Discord.
 
+Images uploaded to Discord get a new image link every few weeks since Feburary 2024. Sapphire Images aims to fix that.
+
 <br>
 <br>
 
