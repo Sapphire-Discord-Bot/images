@@ -1,0 +1,23 @@
+{
+  "name": "sapphire-images",
+  "version": "1.0.0",
+  "description": "Upload images and get URLs that permanently point to these images right within Discord.",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index"
+  },
+  "author": "Xge",
+  "license": "MIT",
+  "dependencies": {
+    "@fastify/multipart": "^8.1.0",
+    "@fastify/static": "^6.12.0",
+    "@fastify/view": "^7.0.0",
+    "discord.js": "^14.14.1",
+    "dotenv": "^16.4.1",
+    "ejs": "^3.1.9",
+    "fast-glob": "^3.3.2",
+    "fastify": "^4.25.2",
+    "form-data": "^4.0.0",
+    "nanoid": "^3.3.7"
+  }
+}

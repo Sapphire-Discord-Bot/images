@@ -1,0 +1,15 @@
+ :root {
+  --font-default: "Onest", "Arial", "sans-serif";
+  --font-clr: rgba(255, 255, 255, .85);
+  --clr-blue-150: hsl(214, 20%, 60%);
+  --clr-blue-400: hsl(214, 20%, 16%);
+  --clr-blue-600: hsl(214, 20%, 13%);
+
+  font-family: var(--font-default);
+  background: var(--clr-blue-400);
+  color: #fff;
+ }
+
+ * {
+  font-family: var(--font-default);
+ }
