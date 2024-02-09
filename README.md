@@ -20,7 +20,7 @@ This means that images uploaded to Discord can no longer be used as Moderation p
    - Serves images uploaded using the bot or the upload endpoint
 - Storage methods:
   - **Local** - Stores images in set folder
-  - **Cloudflare** - Uploads images to [Cloudflare Images](https://www.cloudflare.com/de-de/developer-platform/cloudflare-images/)
+  - **Cloudflare** - Uploads images to [Cloudflare Images](https://www.cloudflare.com/developer-platform/cloudflare-images/)
   - _More aren't planned but feel free to add them yourself, I am happy to merge any useful pull requests!_
 
 <br>
@@ -84,7 +84,7 @@ Store images inside a set folder.
 
 Store images using Cloudflare's Images service.
 
-1. Go to [Cloudflare Images](https://www.cloudflare.com/de-de/developer-platform/cloudflare-images/).
+1. Go to [Cloudflare Images](https://www.cloudflare.com/developer-platform/cloudflare-images/).
 2. Click "Sign up for Cloudflare Images".
 3. Once logged in, choose a paid plan that fits your needs (starting at $5/month).
 4. **Make sure to enable storage when subscribing, otherwise this store method won't work.**
