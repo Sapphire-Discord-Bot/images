@@ -65,7 +65,7 @@ exports.run = () => {
   }
 
   const buffer = await data.toBuffer();
-  let image = await bot.storeImage({
+  let image = await utils.storeImage({
    buffer,
    mime: data.mimetype,
    request,
