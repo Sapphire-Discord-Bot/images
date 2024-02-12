@@ -56,6 +56,13 @@ exports.run = () => {
   
   const data = await request.file();
 
+  if (!data) {
+   return reply.code(400).send({
+    code: 4,
+    message: "File not found"
+   });
+  }
+
   if (!utils.allowedMimeTypes.has(data.mimetype)) {
    return reply.code(400).send({
     code: 2,
