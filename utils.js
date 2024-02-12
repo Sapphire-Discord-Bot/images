@@ -34,22 +34,25 @@ exports.fetch = async (url, options, retryTimeout = 1000) => {
  * @param {Object} options Options 
  * @returns {Promise<Object>} Image object { id }
  */
-exports.storeImage = async ({ url, mime, interaction, message, request } = {}) => {
+exports.storeImage = async ({ buffer, url, mime, interaction, message, request } = {}) => {
  switch (process.env.STORE_METHOD) {
 
   // Store image locally
   case "local":
    // Make URL buffer
-   var imageResult = await this.fetch(url);
-   if (!imageResult?.ok) {
-    console.log("[Local] Image download failed:", imageResult.status, await imageResult.text());
-    return null;
+   if (!buffer) {
+    var imageResult = await this.fetch(url);
+    if (!imageResult?.ok) {
+     console.log("[Local] Image download failed:", imageResult.status, await imageResult.text());
+     return null;
+    }
+    buffer = Buffer.from(await imageResult.arrayBuffer());
    }
    var newImageId = nanoid(35),
        filePath   = path.join(process.env.STORE_LOCAL_PATH, `${newImageId}.${mime.split("/")[1]}`);
    // Write to local storage
    try {
-    await fs.writeFile(filePath, Buffer.from(await imageResult.arrayBuffer()));
+    await fs.writeFile(filePath, buffer);
    } catch (err) {
     console.log("[Local] Image write failed:", err);
     return null;
@@ -67,12 +70,15 @@ exports.storeImage = async ({ url, mime, interaction, message, request } = {}) =
      form.append("url", url);
     } else {
      // Make URL buffer
-     var imageResult = await this.fetch(url);
-     if (!imageResult?.ok) {
-      console.log("[CF] Image download failed:", imageResult.status, await imageResult.text());
-      return null;
+     if (!buffer) {
+      var imageResult = await this.fetch(url);
+      if (!imageResult?.ok) {
+       console.log("[CF] Image download failed:", imageResult.status, await imageResult.text());
+       return null;
+      }
+      buffer = Buffer.from(await imageResult.arrayBuffer());
      }
-     form.append("file", Buffer.from(await imageResult.arrayBuffer()));
+     form.append("file", buffer);
     }
     form.submit({
      host: "api.cloudflare.com",

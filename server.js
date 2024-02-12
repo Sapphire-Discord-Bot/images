@@ -1,8 +1,7 @@
 const fg = require("fast-glob"),
       fs = require("fs/promises");
 
-const bot   = require("./bot.js"),
-      utils = require("./utils.js");
+const utils = require("./utils.js");
 
 const allowedOrigins = new Set([]);
 
