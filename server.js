@@ -48,6 +48,9 @@ exports.run = () => {
   }
 
   if (!request.isMultipart()) {
+   if (process.env.HIDE_UPLOAD_ERRORS !== "true") {
+    console.log("[Upload error] Request is not multipart.");
+   }
    return reply.code(400).send({
     code: 1,
     message: "Invalid request",
@@ -57,6 +60,9 @@ exports.run = () => {
   const data = await request.file();
 
   if (!data) {
+   if (process.env.HIDE_UPLOAD_ERRORS !== "true") {
+    console.log("[Upload error] Request does not include file. Try to upload files how Discord suggests it: https://discord.com/developers/docs/reference#uploading-files");
+   }
    return reply.code(400).send({
     code: 4,
     message: "File not found"
@@ -64,6 +70,9 @@ exports.run = () => {
   }
 
   if (!utils.allowedMimeTypes.has(data.mimetype)) {
+   if (process.env.HIDE_UPLOAD_ERRORS !== "true") {
+    console.log("[Upload error] Request does not include allowed file.");
+   }
    return reply.code(400).send({
     code: 2,
     message: "Invalid file type",
@@ -78,6 +87,9 @@ exports.run = () => {
   });
 
   if (!image) {
+   if (process.env.HIDE_UPLOAD_ERRORS !== "true") {
+    console.log("[Upload error] Image upload failed.");
+   }
    return reply.code(500).send({
     code: 3,
     message: "Image upload failed, please try again.",
