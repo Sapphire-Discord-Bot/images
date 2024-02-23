@@ -5,7 +5,7 @@ const fg             = require("fast-glob"),
 
 const utils = require("./utils.js");
 
-const allowedOrigins = new Set(process.env.ALLOWED_ORIGINS.split(","));
+const allowedOrigins = new Set(process.env.ALLOWED_ORIGINS?.split?.(",") || []);
 
 exports.run = () => {
 
