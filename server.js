@@ -1,5 +1,7 @@
-const fg = require("fast-glob"),
-      fs = require("fs/promises");
+const fg             = require("fast-glob"),
+      fs             = require("fs/promises"),
+      path           = require("path"),
+      checkDiskSpace = require("check-disk-space").default;
 
 const utils = require("./utils.js");
 
@@ -106,7 +108,9 @@ exports.run = () => {
  fastify.get("/:id", async (request, reply) => {
 
   // Set CORS headers
-  let headers = {};
+  let headers = {
+   "Cache-Control": "public,max-age=172800,stale-while-revalidate=7200",
+  };
   if (request.headers.origin) {
    if (!allowedOrigins.has(request.headers.origin)) return reply.code(400).send({ code: 0 });
    headers["access-control-allow-origin"] = request.headers.origin;
@@ -126,17 +130,49 @@ exports.run = () => {
     }).catch((err) => {
      console.log("[Local] Image path resolve error:", err);
     });
-    if (!imagePaths || !imagePaths.length) break;
+    if (!imagePaths?.length) break;
     imageBuffer = await fs.readFile(imagePaths[0]);
     imageMime = `image/${imagePaths[0].split(".").pop()}`
     break;
 
    // Cloudflare Images
    case "cf":
-    var imageResult = await utils.fetch(`${process.env.STORE_CF_DELIVERY_URL}/${imageId}/public`);
-    if (!imageResult?.ok) break;
-    imageBuffer = Buffer.from(await imageResult.arrayBuffer());
-    imageMime = imageResult.headers.get("content-type");
+    var imageResult = await utils.getImageBufferByURL(`${process.env.STORE_CF_DELIVERY_URL}/${imageId}/public`);
+    if (!imageResult) break;
+    imageBuffer = imageResult.buffer;
+    imageMime = imageResult.mime;
+    break;
+
+   // Fetch from Cloudflare Images, then store locally to reduce requests to Cloudflare
+   case "cflocal":
+    var imagePaths = await fg(`${process.env.STORE_LOCAL_PATH}/${imageId}.*`, {
+     onlyFiles: true,
+     caseSensitiveMatch: true,
+    }).catch((err) => {
+     console.log("[Local] Image path resolve error:", err);
+    });
+    if (imagePaths?.length) {
+     imageBuffer = await fs.readFile(imagePaths[0]);
+     imageMime = `image/${imagePaths[0].split(".").pop()}`
+    } else {
+     console.log("Fetching...");
+     // Fetch from Cloudflare Images
+     var imageResult = await utils.getImageBufferByURL(`${process.env.STORE_CF_DELIVERY_URL}/${imageId}/public`);
+     if (!imageResult) break;
+     imageBuffer = imageResult.buffer;
+     imageMime = imageResult.mime;
+     // Store locally for future requests
+     setTimeout(async () => {
+      let diskSpace = await checkDiskSpace(path.resolve(process.env.STORE_LOCAL_PATH));
+      // 100MB in bytes = 1e+8
+      if (diskSpace.free < imageBuffer.length || diskSpace.free < 1e+8) return console.log("[Local] Not enough space to store image locally.");
+      utils.storeLocalImage({
+       buffer: imageBuffer,
+       mime: imageMime,
+       imageId,
+      });
+     });
+    }
     break;
 
   }

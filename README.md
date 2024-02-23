@@ -21,6 +21,7 @@ This means that images uploaded to Discord can no longer be used as Moderation p
 - Storage methods:
   - **Local** - Stores images in set folder
   - **Cloudflare** - Uploads images to [Cloudflare Images](https://www.cloudflare.com/developer-platform/cloudflare-images/)
+  - **Cloudflare with local** - Upload images to Cloudflare and store them locally to reduce requests to Cloudflare.
   - _More aren't planned but feel free to add them yourself, I am happy to merge any useful pull requests!_
 
 <br>
@@ -96,6 +97,15 @@ Store images using Cloudflare's Images service.
 9. Create a token and choose "Custom token".
 10. Name your token and set permissions to `Read` and `Edit` `Account > Cloudflare Images`.
 11. Once your token is created, set `STORE_CF_TOKEN` to your just created token.
+
+---
+
+### How to set up store method `cflocal`?
+
+Store images locally and upload them to Cloudflare Images as well to make use of Cloudflare's permanent image storage while reducing requests to Cloudflare.
+
+1. Set up store method `local` ([as described above](#how-to-set-up-store-method-local)).
+2. Set up store method `cf` ([as described above](#how-to-set-up-store-method-cf))..
 
 <br>
 <br>

@@ -39,77 +39,33 @@ exports.storeImage = async ({ buffer, url, mime, interaction, message, request }
 
   // Store image locally
   case "local":
-   // Make URL buffer
-   if (!buffer) {
-    var imageResult = await this.fetch(url);
-    if (!imageResult?.ok) {
-     console.log("[Local] Image download failed:", imageResult.status, await imageResult.text());
-     return null;
-    }
-    buffer = Buffer.from(await imageResult.arrayBuffer());
-   }
-   var newImageId = nanoid(35),
-       filePath   = path.join(process.env.STORE_LOCAL_PATH, `${newImageId}.${mime.split("/")[1]}`);
-   // Write to local storage
-   try {
-    await fs.writeFile(filePath, buffer);
-   } catch (err) {
-    console.log("[Local] Image write failed:", err);
-    return null;
-   }
-   return {
-    id: newImageId,
-   };
+   return await this.storeLocalImage({
+    buffer,
+    mime,
+    url,
+   });
 
   // Store image using Cloudflare Images
   case "cf":
-   return await new Promise(async (resolve) => {
-    var form = new FormData();
-    // Letting CF fetch the image by URL only works with ephemeral interactions, I don't know why :(
-    if (interaction?.ephemeral) {
-     form.append("url", url);
-    } else {
-     // Make URL buffer
-     if (!buffer) {
-      var imageResult = await this.fetch(url);
-      if (!imageResult?.ok) {
-       console.log("[CF] Image download failed:", imageResult.status, await imageResult.text());
-       return null;
-      }
-      buffer = Buffer.from(await imageResult.arrayBuffer());
-     }
-     form.append("file", buffer);
-    }
-    form.submit({
-     host: "api.cloudflare.com",
-     path: `/client/v4/accounts/${process.env.STORE_CF_ID}/images/v1`,
-     method: "POST",
-     protocol: "https:",
-     headers: {
-      "Authorization": `Bearer ${process.env.STORE_CF_TOKEN}`,
-     },
-    }, (err, res) => {
-     if (err) {
-      console.log("[CF] Image upload failed:", err);
-      return null;
-     }
-     if (res.statusCode !== 200) {
-      console.log("[CF] Image upload failed:", res.statusCode, res.statusMessage);
-      return null;
-     }
-     res.setEncoding("utf8");
-     let chunks = [];
-     res.on("data", (chunk) => {
-      chunks += chunk;
-     });
-     res.on("end", () => {
-      let data = JSON.parse(chunks);
-      resolve({
-       id: data.result.id,
-      });
-     });
-    });
+   return await this.storeCloudflareImage({
+    buffer,
+    url,
+    useURL: !!interaction?.ephemeral, // Letting CF fetch the image by URL only works with ephemeral interactions, I don't know why :(
    });
+
+  case "cflocal":
+   var uploadResult = await this.storeCloudflareImage({
+    buffer,
+    url,
+    useURL: !!interaction?.ephemeral // Letting CF fetch the image by URL only works with ephemeral interactions, I don't know why :(
+   });
+   if (!uploadResult) return null;
+   var newImageId = uploadResult.id;
+   return await this.storeLocalImage({
+    url: `${process.env.STORE_CF_DELIVERY_URL}/${newImageId}/public`,
+    imageId: newImageId
+   });
+
 
   // Add other storage methods here
   // ...
@@ -118,4 +74,104 @@ exports.storeImage = async ({ buffer, url, mime, interaction, message, request }
    return null;
 
  }
+}
+
+/**
+ * Get image buffer by URL
+ * @param {String} url URL to fetch 
+ * @returns {Promise<Object>} Image buffer { buffer, mime } 
+ */
+exports.getImageBufferByURL = async (url) => {
+ var imageResult = await this.fetch(url, {
+  headers: process.env.STORE_CFLOCAL_ALLOW_AVIF ? {
+   accept: "image/avif,image/png,image/webp,image/jpeg,image/gif"
+  } : {}
+ });
+ if (!imageResult?.ok) {
+  console.log(`Image download (${url}) failed:`, imageResult.status, await imageResult.text());
+  return null;
+ }
+ return {
+  buffer: Buffer.from(await imageResult.arrayBuffer()),
+  mime: imageResult.headers.get("content-type"),
+ }
+}
+
+
+/**
+ * Store image locally
+ * @param {Object} options Options
+ * @returns {Promise<Object>} Image object { id }
+ */
+exports.storeLocalImage = async ({ buffer, url, mime, imageId = nanoid(35) } = {}) => {
+ // Make URL buffer
+ if (!buffer) {
+  let imageFetchResult = await this.getImageBufferByURL(url);
+  buffer = imageFetchResult.buffer;
+  if (!mime) {
+   mime = imageFetchResult.mime;
+   console.log("fetched", url, mime);
+  }
+ }
+ let filePath = path.join(process.env.STORE_LOCAL_PATH, `${imageId}.${mime.split("/")[1]}`);
+ // Write to local storage
+ try {
+  await fs.writeFile(filePath, buffer);
+ } catch (err) {
+  console.log("[Local] Image write failed:", err);
+  return null;
+ }
+ return {
+  id: imageId,
+ };
+}
+
+/**
+ * Upload images to Cloudflare Images
+ * @returns {Promise<Object>} Image object { id }
+ */
+exports.storeCloudflareImage = ({ buffer, url, useURL = false } = {}) => {
+ return new Promise(async (resolve) => {
+  var form = new FormData();
+  // Letting CF fetch the image by URL only works with ephemeral interactions, I don't know why :(
+  if (useURL) {
+   form.append("url", url);
+  } else {
+   // Make URL buffer
+   if (!buffer) {
+    let imageFetchResult = await this.getImageBufferByURL(url);
+    buffer = imageFetchResult.buffer;
+   }
+   form.append("file", buffer);
+  }
+  form.submit({
+   host: "api.cloudflare.com",
+   path: `/client/v4/accounts/${process.env.STORE_CF_ID}/images/v1`,
+   method: "POST",
+   protocol: "https:",
+   headers: {
+    "Authorization": `Bearer ${process.env.STORE_CF_TOKEN}`,
+   },
+  }, (err, res) => {
+   if (err) {
+    console.log("[CF] Image upload failed:", err);
+    return null;
+   }
+   if (res.statusCode !== 200) {
+    console.log("[CF] Image upload failed:", res.statusCode, res.statusMessage);
+    return null;
+   }
+   res.setEncoding("utf8");
+   let chunks = [];
+   res.on("data", (chunk) => {
+    chunks += chunk;
+   });
+   res.on("end", () => {
+    let data = JSON.parse(chunks);
+    resolve({
+     id: data.result.id,
+    });
+   });
+  });
+ });
 }
