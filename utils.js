@@ -115,7 +115,6 @@ exports.storeLocalImage = async ({ buffer, url, mime, imageId = nanoid(35) } = {
   buffer = imageFetchResult.buffer;
   if (!mime) {
    mime = imageFetchResult.mime;
-   console.log("fetched", url, mime);
   }
  }
  let filePath = path.join(process.env.STORE_LOCAL_PATH, `${imageId}.${mime.split("/")[1]}`);

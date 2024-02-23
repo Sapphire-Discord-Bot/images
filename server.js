@@ -155,7 +155,6 @@ exports.run = () => {
      imageBuffer = await fs.readFile(imagePaths[0]);
      imageMime = `image/${imagePaths[0].split(".").pop()}`
     } else {
-     console.log("Fetching...");
      // Fetch from Cloudflare Images
      var imageResult = await utils.getImageBufferByURL(`${process.env.STORE_CF_DELIVERY_URL}/${imageId}/public`);
      if (!imageResult) break;
