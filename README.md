@@ -105,7 +105,7 @@ Store images using Cloudflare's Images service.
 Store images locally and upload them to Cloudflare Images as well to make use of Cloudflare's permanent image storage while reducing requests to Cloudflare.
 
 1. Set up store method `local` ([as described above](#how-to-set-up-store-method-local)).
-2. Set up store method `cf` ([as described above](#how-to-set-up-store-method-cf))..
+2. Set up store method `cf` ([as described above](#how-to-set-up-store-method-cf)).
 
 <br>
 <br>
