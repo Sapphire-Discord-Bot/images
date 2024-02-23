@@ -34,7 +34,7 @@ exports.fetch = async (url, options, retryTimeout = 1000) => {
  * @param {Object} options Options 
  * @returns {Promise<Object>} Image object { id }
  */
-exports.storeImage = async ({ buffer, url, mime, interaction, message, request } = {}) => {
+exports.storeImage = async ({ buffer, url, mime, interaction, message, request, metadata = {} } = {}) => {
  switch (process.env.STORE_METHOD) {
 
   // Store image locally
@@ -54,10 +54,15 @@ exports.storeImage = async ({ buffer, url, mime, interaction, message, request }
    });
 
   case "cflocal":
+   var metadata = metadata || {};
+   if (interaction?.user?.id || message?.author?.id) {
+    metadata.discordAuthorId = interaction?.user?.id || message?.author?.id;
+   }
    var uploadResult = await this.storeCloudflareImage({
     buffer,
     url,
-    useURL: !!interaction?.ephemeral // Letting CF fetch the image by URL only works with ephemeral interactions, I don't know why :(
+    useURL: !!interaction?.ephemeral, // Letting CF fetch the image by URL only works with ephemeral interactions, I don't know why :(
+    metadata,
    });
    if (!uploadResult) return null;
    var newImageId = uploadResult.id;
@@ -130,7 +135,7 @@ exports.storeLocalImage = async ({ buffer, url, mime, imageId = nanoid(35) } = {
  * Upload images to Cloudflare Images
  * @returns {Promise<Object>} Image object { id }
  */
-exports.storeCloudflareImage = ({ buffer, url, useURL = false } = {}) => {
+exports.storeCloudflareImage = ({ buffer, url, useURL = false, metadata = null } = {}) => {
  return new Promise(async (resolve) => {
   var form = new FormData();
   // Letting CF fetch the image by URL only works with ephemeral interactions, I don't know why :(
@@ -143,6 +148,9 @@ exports.storeCloudflareImage = ({ buffer, url, useURL = false } = {}) => {
     buffer = imageFetchResult.buffer;
    }
    form.append("file", buffer);
+  }
+  if (metadata) {
+   form.append("metadata", JSON.stringify(metadata));
   }
   form.submit({
    host: "api.cloudflare.com",
