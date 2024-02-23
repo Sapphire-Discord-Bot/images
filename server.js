@@ -61,7 +61,7 @@ exports.run = () => {
  
   const data = await request.file();
 
-  console.log("Fields", request.parts());
+  console.log("Query", request.query);
 
   if (!data) {
    if (process.env.HIDE_UPLOAD_ERRORS !== "true") {
