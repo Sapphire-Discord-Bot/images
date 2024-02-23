@@ -88,7 +88,7 @@ exports.storeImage = async ({ buffer, url, mime, interaction, message, request }
  */
 exports.getImageBufferByURL = async (url) => {
  var imageResult = await this.fetch(url, {
-  headers: process.env.STORE_CFLOCAL_ALLOW_AVIF ? {
+  headers: process.env.STORE_CFLOCAL_ALLOW_AVIF === "true" ? {
    accept: "image/avif,image/png,image/webp,image/jpeg,image/gif"
   } : {}
  });
