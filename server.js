@@ -42,16 +42,12 @@ exports.run = () => {
  // Upload image
  fastify.post("/upload", async (request, reply) => {
 
-  console.log("upload", 1);
-
   if (process.env.UPLOAD_TOKEN && request.headers.authorization !== process.env.UPLOAD_TOKEN) {
    return reply.code(401).send({
     code: 0,
     message: "Unauthorized",
    });
   }
-
-  console.log("upload", 2);
 
   if (!request.isMultipart()) {
    if (process.env.HIDE_UPLOAD_ERRORS !== "true") {
@@ -62,12 +58,10 @@ exports.run = () => {
     message: "Invalid request",
    })
   }
-  
-  console.log("upload", 3);
-
+ 
   const data = await request.file();
 
-  console.log("upload", 4);
+  console.log("Fields", data.fields);
 
   if (!data) {
    if (process.env.HIDE_UPLOAD_ERRORS !== "true") {
@@ -79,8 +73,6 @@ exports.run = () => {
    });
   }
 
-  console.log("upload", 5);
-
   if (!utils.allowedMimeTypes.has(data.mimetype)) {
    if (process.env.HIDE_UPLOAD_ERRORS !== "true") {
     console.log("[Upload error] Request does not include allowed file.");
@@ -91,17 +83,13 @@ exports.run = () => {
    });
   }
 
-  console.log("upload", 6);
-
   const buffer = await data.toBuffer();
   let image = await utils.storeImage({
    buffer,
    mime: data.mimetype,
    request,
-   metadata: data.metadata,
+   metadata: data.fields,
   });
-
-  console.log("upload", 7);
 
   if (!image) {
    if (process.env.HIDE_UPLOAD_ERRORS !== "true") {
@@ -112,8 +100,6 @@ exports.run = () => {
     message: "Image upload failed, please try again.",
    });
   }
-
-  console.log("upload", 8);
 
   reply.code(200).send({
    id: image.id,

@@ -123,7 +123,7 @@ exports.storeLocalImage = async ({ buffer, url, mime, imageId = nanoid(35) } = {
  try {
   await fs.writeFile(filePath, buffer);
  } catch (err) {
-  console.log("[Local] Image write failed:", err);
+  console.log("[Local] Image write failed:", err, "- Did you create the folder in which local images should be stored?");
   return null;
  }
  return {
