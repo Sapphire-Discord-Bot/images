@@ -88,7 +88,6 @@ exports.run = () => {
    buffer,
    mime: data.mimetype,
    request,
-   metadata: data.fields,
   });
 
   if (!image) {
