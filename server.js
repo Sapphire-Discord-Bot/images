@@ -108,9 +108,7 @@ exports.run = () => {
  fastify.get("/:id", async (request, reply) => {
 
   // Set CORS headers
-  let headers = {
-   "Cache-Control": "public,max-age=172800,stale-while-revalidate=7200",
-  };
+  let headers = {};
   if (request.headers.origin) {
    if (!allowedOrigins.has(request.headers.origin)) return reply.code(400).send({ code: 0 });
    headers["access-control-allow-origin"] = request.headers.origin;
