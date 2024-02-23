@@ -61,8 +61,6 @@ exports.run = () => {
  
   const data = await request.file();
 
-  console.log("Query", request.query);
-
   if (!data) {
    if (process.env.HIDE_UPLOAD_ERRORS !== "true") {
     console.log("[Upload error] Request does not include file. Try to upload files how Discord suggests it: https://discord.com/developers/docs/reference#uploading-files");
