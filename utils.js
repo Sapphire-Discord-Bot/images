@@ -162,11 +162,11 @@ exports.storeCloudflareImage = ({ buffer, url, useURL = false, metadata = null }
   }, (err, res) => {
    if (err) {
     console.log("[CF] Image upload failed:", err);
-    return null;
+    return resolve(null);
    }
    if (res.statusCode !== 200) {
     console.log("[CF] Image upload failed:", res.statusCode, res.statusMessage);
-    return null;
+    return resolve(null);
    }
    res.setEncoding("utf8");
    let chunks = [];
