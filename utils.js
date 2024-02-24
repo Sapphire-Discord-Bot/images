@@ -62,7 +62,7 @@ exports.storeImage = async ({ buffer, url, mime, interaction, message, request }
     buffer,
     url,
     useURL: !!interaction?.ephemeral, // Letting CF fetch the image by URL only works with ephemeral interactions, I don't know why :(
-    metadata: request.query,
+    metadata: request?.query,
    });
    if (!uploadResult) return null;
    var newImageId = uploadResult.id;
