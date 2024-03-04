@@ -180,7 +180,7 @@ exports.run = () => {
   let isBot     = request.headers["user-agent"].includes("bot"),
       isDiscord = !request.headers.accept && !request.headers.referer && !request.headers["accept-language"] && request.headers["user-agent"].startsWith("Mozilla/"), // Make somehow sure that Discord is making that request to display image properly within client
       isGitHub  = request.headers["user-agent"].includes("github-camo");
-  if (isBot || isDiscord || isGitHub || headers["access-control-allow-origin"] || headers["sec-fetch-dest"] === "image") {
+  if (isBot || isDiscord || isGitHub || headers["access-control-allow-origin"] || request.headers["sec-fetch-dest"] === "image") {
    headers["content-type"] = imageMime;
    headers["cache-control"] = "public, max-age=604800, immutable";
    reply.headers(headers);
