@@ -66,8 +66,9 @@ exports.storeImage = async ({ buffer, url, mime, interaction, message, request }
    });
    if (!uploadResult) return null;
    var newImageId = uploadResult.id;
+   var putSlash = !process.env.STORE_CF_DELIVERY_URL?.endsWith?.("/");
    return await this.storeLocalImage({
-    url: `${process.env.STORE_CF_DELIVERY_URL}/${newImageId}/public`.replace(/\/\//g, ""),
+    url: `${process.env.STORE_CF_DELIVERY_URL}${putSlash ? "/" : ""}${newImageId}/public`,
     imageId: newImageId
    });
 
