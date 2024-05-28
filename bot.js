@@ -110,6 +110,9 @@ exports.run = () => {
    url: firstAttachment.url,
    mime: firstAttachment.contentType,
    message,
+  }).catch((err) => {
+   console.log("[Discord] Storing image failed (probably due to deleted message):", err);
+   return null;
   });
   if (reactionPromise) {
    let reaction = await reactionPromise;
@@ -123,6 +126,9 @@ exports.run = () => {
     allowedMentions: {
      repliedUser: false,
     },
+   }).catch((err) => {
+    console.log("[Discord] Replying to message failed (probably due to deleted message):", err);
+    return null;
    });
   } else {
    message.reply({
@@ -130,6 +136,9 @@ exports.run = () => {
     allowedMentions: {
      repliedUser: false,
     },
+   }).catch((err) => {
+    console.log("[Discord] Replying to message failed (probably due to deleted message):", err);
+    return null;
    });
   }
  });
