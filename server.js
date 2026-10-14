@@ -110,7 +110,7 @@ exports.run = () => {
   if (!request.params.id) return reply.code(404).view(`/views/404.ejs`);
 
   // Only allow nanoid/Cloudflare image ID characters to prevent path traversal and glob injection
-  if (!/^[A-Za-z0-9_-]{1,36}$/.test(request.params.id)) return reply.code(404).view(`/views/404.ejs`);
+  if (!/^[A-Za-z0-9_-]{1,64}$/.test(request.params.id)) return reply.code(404).view(`/views/404.ejs`);
 
   // Set CORS headers
   let headers = {};
