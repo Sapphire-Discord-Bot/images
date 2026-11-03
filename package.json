@@ -9,9 +9,9 @@
   "author": "Xge",
   "license": "MIT",
   "dependencies": {
-    "@fastify/multipart": "^8.1.0",
-    "@fastify/static": "^6.12.0",
-    "@fastify/view": "^7.0.0",
+    "@fastify/multipart": "^9.4.0",
+    "@fastify/static": "^8.3.0",
+    "@fastify/view": "^10.0.2",
     "check-disk-space": "^3.4.0",
     "discord.js": "^14.14.1",
     "dotenv": "^16.4.1",
